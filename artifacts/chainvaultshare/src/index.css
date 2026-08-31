@@ -394,10 +394,65 @@
 
 .light .text-glow {
   text-shadow: 0 0 20px rgba(82, 0, 10, 0.2);
+  color: #52000a !important;
 }
 
-.light .glow-cyan {
+.light .glow-cyan,
+.light .glow-primary {
   box-shadow: 0 0 24px rgba(82, 0, 10, 0.12);
+}
+
+/* ==========================================================================
+   Strict Maroon Color Enforcement in Light Mode (No Blue/Cyan)
+   ========================================================================== */
+.light {
+  color: #52000a;
+}
+
+/* Re-map all cyan, blue, indigo, and sky text to rich maroon / light maroon */
+.light [class*="text-cyan"],
+.light [class*="text-blue"],
+.light [class*="text-indigo"],
+.light [class*="text-sky"] {
+  color: #7b1d28 !important;
+}
+
+.light .text-primary {
+  color: #52000a !important;
+}
+
+.light .text-foreground {
+  color: #52000a !important;
+}
+
+.light .text-muted-foreground {
+  color: #7b1d28 !important; /* Deep light-maroon instead of washed out text */
+}
+
+.light .text-accent {
+  color: #52000a !important;
+}
+
+/* Re-map all cyan, blue, indigo badges & backgrounds to garnet maroon tints */
+.light [class*="bg-cyan"],
+.light [class*="bg-blue"],
+.light [class*="bg-indigo"] {
+  background-color: rgba(82, 0, 10, 0.08) !important;
+  border-color: rgba(82, 0, 10, 0.22) !important;
+  color: #52000a !important;
+}
+
+.light [class*="border-cyan"],
+.light [class*="border-blue"],
+.light [class*="border-indigo"] {
+  border-color: rgba(82, 0, 10, 0.25) !important;
+}
+
+/* Re-map icons that use cyan/blue to maroon */
+.light svg[class*="text-cyan"],
+.light svg[class*="text-blue"],
+.light svg[class*="text-indigo"] {
+  color: #52000a !important;
 }
 
 

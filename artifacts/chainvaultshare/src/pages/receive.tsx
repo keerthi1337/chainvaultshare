@@ -340,7 +340,7 @@ export default function Receive() {
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <p className="text-sm font-bold text-accent tracking-wide">Transfer found — ready to download</p>
                     {result.transfer.isP2p && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border bg-cyan-500/10 text-cyan-400 border-cyan-500/30 animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border bg-primary/10 text-primary border-primary/25 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/30 animate-pulse">
                         <Radio className="w-3 h-3" />
                         Direct P2P Relay
                       </span>
@@ -348,8 +348,8 @@ export default function Receive() {
                     {isE2eEncrypted && (
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border ${
                         e2eKey 
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                          : "bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse-subtle"
+                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                          : "bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse-subtle"
                       }`}>
                         <KeyRound className="w-3 h-3" />
                         {e2eKey ? "Decryption Active" : "Key Missing"}
@@ -385,9 +385,9 @@ export default function Receive() {
                 </div>
 
                 {result.transfer.isP2p && (
-                  <div className="p-4 rounded-xl flex items-start gap-3 bg-cyan-500/10 border border-cyan-500/25">
-                    <Radio className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
-                    <p className="text-xs text-cyan-200/85 leading-relaxed">
+                  <div className="p-4 rounded-xl flex items-start gap-3 border bg-primary/10 border-primary/25 dark:bg-cyan-500/10 dark:border-cyan-500/25">
+                    <Radio className="w-4 h-4 text-primary dark:text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
+                    <p className="text-xs text-foreground/90 dark:text-cyan-200/85 leading-relaxed">
                       <strong>Peer-to-Peer Real-Time Stream:</strong> This transfer is streamed live from the sender's browser session. Keep this tab open while downloading.
                     </p>
                   </div>

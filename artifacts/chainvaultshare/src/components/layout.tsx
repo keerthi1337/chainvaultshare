@@ -124,7 +124,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               className="w-9 h-9 rounded-full flex items-center justify-center border border-white/10 bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all shadow-sm"
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-cyan-400" />}
+              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-primary" />}
             </button>
 
             {/* Mobile hamburger */}

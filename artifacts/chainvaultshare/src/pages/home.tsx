@@ -521,13 +521,12 @@ export default function Home() {
 
           <div className="px-6 py-8 text-center">
             <p
-              className="text-5xl md:text-6xl font-black font-mono text-primary tracking-widest mb-2"
-              style={{ textShadow: "0 0 30px hsla(180,80%,55%,0.4)" }}
+              className="text-5xl md:text-6xl font-black font-mono text-primary text-glow tracking-widest mb-2"
               data-testid="text-proof-id"
             >
               {completedTransfer.proofId}
             </p>
-            <p className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
               {completedTransfer.fileCount} file{completedTransfer.fileCount !== 1 ? "s" : ""} · {formatBytes(completedTransfer.totalSize)} · anyone with this code can download
             </p>
           </div>
@@ -579,17 +578,16 @@ export default function Home() {
 
             {/* Zero-Knowledge warning text — only show when encryption was used */}
             {shareKeyLink && (
-              <p className="text-[10px] mt-1 text-center font-medium" style={{ color: "rgba(148,163,184,0.65)" }}>
+              <p className="text-[10px] mt-1 text-center font-medium text-muted-foreground">
                 🔐 Share this link privately. If lost, files are unrecoverable.
               </p>
             )}
 
             {/* Ghost mode confirmation badge */}
             {ghostMode && (
-              <div className="mt-4 p-4 rounded-xl flex items-center gap-3"
-                style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.3)" }}>
+              <div className="mt-4 p-4 rounded-xl flex items-center gap-3 border bg-purple-500/10 border-purple-500/30 dark:bg-purple-500/10 dark:border-purple-500/30">
                 <Ghost className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                <p className="text-xs font-semibold leading-relaxed" style={{ color: "rgba(216,180,254,0.8)" }}>
+                <p className="text-xs font-semibold leading-relaxed text-foreground/90">
                   Ghost Mode active — no logs, no analytics, no server trace for this transfer.
                 </p>
               </div>
@@ -598,15 +596,14 @@ export default function Home() {
             {/* P2P live stream relay banner */}
             {(isP2p || (completedTransfer as any).isP2p) && (
               <div
-                className="mt-4 p-4 rounded-xl flex items-start gap-3"
-                style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.35)" }}
+                className="mt-4 p-4 rounded-xl flex items-start gap-3 border bg-primary/10 border-primary/25 dark:bg-cyan-500/10 dark:border-cyan-500/35"
               >
-                <Radio className="w-5 h-5 text-cyan-400 flex-shrink-0 animate-pulse mt-0.5" />
+                <Radio className="w-5 h-5 text-primary dark:text-cyan-400 flex-shrink-0 animate-pulse mt-0.5" />
                 <div className="text-left">
-                  <p className="text-xs font-bold text-cyan-300">
+                  <p className="text-xs font-bold text-primary dark:text-cyan-300">
                     Direct P2P Stream Relay Active
                   </p>
-                  <p className="text-[11px] text-cyan-200/75 mt-1 leading-relaxed">
+                  <p className="text-[11px] text-foreground/85 dark:text-cyan-200/75 mt-1 leading-relaxed">
                     Keep this browser tab open! File chunks will be streamed directly from your browser in real-time when the recipient initiates the download.
                   </p>
                 </div>
@@ -1033,15 +1030,15 @@ export default function Home() {
                   </label>
 
                   {/* Direct P2P Relay */}
-                  <label className="p-4 rounded-2xl liquid-glass-card border border-cyan-500/20 flex items-center justify-between cursor-pointer">
+                  <label className="p-4 rounded-2xl liquid-glass-card border border-primary/20 dark:border-cyan-500/20 flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                        <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 dark:bg-cyan-500/15 dark:border-cyan-500/30 flex items-center justify-center shadow-sm dark:shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                        <Radio className="w-5 h-5 text-primary dark:text-cyan-400 animate-pulse" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
                           Direct P2P Relay
-                          <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 uppercase tracking-wider">Unlimited Size</span>
+                          <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-primary/10 text-primary border border-primary/25 dark:bg-cyan-500/25 dark:text-cyan-300 dark:border-cyan-400/40 uppercase tracking-wider">Unlimited Size</span>
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">Send files of any size directly between devices — keep this tab open</p>
                       </div>
@@ -1049,11 +1046,12 @@ export default function Home() {
                     <button
                       type="button"
                       onClick={() => setIsP2p(!isP2p)}
-                      className="relative rounded-full transition-all duration-300"
-                      style={{ width: "46px", height: "26px", background: isP2p ? "#06b6d4" : "var(--border)", boxShadow: isP2p ? "0 0 15px rgba(6,182,212,0.5)" : "none" }}
+                      className={`relative rounded-full transition-all duration-300 w-[46px] h-[26px] ${
+                        isP2p ? "bg-primary dark:bg-[#06b6d4] shadow-md dark:shadow-[0_0_15px_rgba(6,182,212,0.5)]" : "bg-border"
+                      }`}
                     >
-                      <div className="absolute top-0.5 rounded-full bg-white shadow transition-all duration-300"
-                        style={{ width: "22px", height: "22px", transform: isP2p ? "translateX(22px)" : "translateX(2px)" }} />
+                      <div className="absolute top-0.5 rounded-full bg-white shadow transition-all duration-300 w-[22px] h-[22px]"
+                        style={{ transform: isP2p ? "translateX(22px)" : "translateX(2px)" }} />
                     </button>
                   </label>
 

@@ -206,7 +206,7 @@ export default function Transfers() {
                               </span>
                             )}
                             {t.isP2p && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-cyan-500/20 text-cyan-400 uppercase tracking-wider">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold border border-primary/25 bg-primary/10 text-primary dark:border-transparent dark:bg-cyan-500/20 dark:text-cyan-400 uppercase tracking-wider">
                                 <Radio className="w-2.5 h-2.5" />
                                 P2P Relay
                               </span>
