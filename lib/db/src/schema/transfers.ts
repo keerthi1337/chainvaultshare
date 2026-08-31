@@ -16,6 +16,7 @@ export const transfersTable = pgTable("transfers", {
   storageRef: text("storage_ref"),
   txRef: text("tx_ref"),
   ownerAddress: text("owner_address"),
+  ownerIp: text("owner_ip"), // SHA-256 hashed IP for recents lookup
   ownerToken: text("owner_token"), // SHA-256 hash of raw token returned once to client
   ghostMode: boolean("ghost_mode").notNull().default(false), // skip all logging and metadata
   isP2p: boolean("is_p2p").notNull().default(false), // real-time peer-to-peer stream relay

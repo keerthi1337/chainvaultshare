@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useVerifyTransfer } from "@workspace/api-client-react";
-import { ShieldCheck, ShieldAlert, ChevronDown, ChevronUp, Loader2, FileText } from "lucide-react";
+import { ShieldCheck, ShieldAlert, ChevronDown, ChevronUp, Loader2, FileText, Ghost, Lock, KeyRound, Radio } from "lucide-react";
 import { formatBytes, formatRelativeTime } from "@/lib/utils";
 import type { VerificationResult } from "@workspace/api-client-react";
 
@@ -30,47 +30,41 @@ export default function Verify() {
   }, [initialQuery]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full">
       {/* Header */}
-      <div className="text-center mb-12 mt-8">
-        <div className="w-16 h-16 rounded-2xl border border-primary/30 bg-primary/5 flex items-center justify-center mx-auto mb-6 shadow-sm shadow-primary/10">
-          <ShieldCheck className="w-7 h-7 text-primary animate-pulse" />
-        </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-glow">Verify a transfer</h1>
-        <p className="text-sm md:text-base text-muted-foreground leading-relaxed tracking-wide max-w-xl mx-auto">
-          Enter code or share link to verify transfer.
+      <div className="mb-8 mt-5">
+        <h1 className="text-4xl font-black tracking-tight text-glow">Verify transfer</h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          Verify cryptographic integrity, ownership, and delivery status of any transfer.
         </p>
       </div>
 
-      <div
-        className="rounded-2xl mb-10 overflow-hidden glass-widget border border-primary/20"
-      >
-        <form onSubmit={handleVerify} className="flex items-center">
+      {/* Lookup bar */}
+      <form onSubmit={handleVerify} className="mb-8">
+        <div className="flex gap-2">
           <input
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="CVT-2048 or https://chainvaultshare.app/t/..."
-            className="flex-1 bg-transparent px-6 py-4.5 text-lg text-foreground placeholder:text-muted-foreground/40 outline-none font-mono"
+            placeholder="Enter Proof ID (e.g. CVT-A1B2C3D4)..."
             data-testid="input-verify-query"
+            className="flex-1 px-4 py-3 rounded-lg border border-border/30 bg-muted/10 font-mono text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
           />
           <button
             type="submit"
-            disabled={verifyTransfer.isPending}
+            disabled={verifyTransfer.isPending || !query.trim()}
             data-testid="button-verify-submit"
-            className="px-10 py-4.5 text-base font-bold tracking-widest uppercase text-primary-foreground bg-primary hover:opacity-90 disabled:opacity-50 transition-opacity border-l border-border/20 shrink-0 font-mono"
+            className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
-            {verifyTransfer.isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              "Verify"
-            )}
+            {verifyTransfer.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            Verify
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
 
       {/* Result */}
       {result && (
-        <div className="animate-in fade-in slide-in-from-bottom-3 duration-400">
+        <div className="space-y-4">
           {result.verified && result.transfer ? (
             <div className="rounded overflow-hidden glass-widget">
               {/* Verified banner */}
@@ -83,42 +77,121 @@ export default function Verify() {
                   <p className="text-xs text-muted-foreground mt-1">Transfer matches original proof · Ownership confirmed</p>
                 </div>
               </div>
- 
+
               {/* Details */}
               <div className="px-6.5 py-6 grid grid-cols-2 gap-x-10 gap-y-6">
                 {/* Transfer info */}
                 <div className="col-span-2 md:col-span-1 space-y-5.5">
                   <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">Transfer details</p>
-                  {[
-                    {
-                      label: "Name",
-                      value: (
-                        <span className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-muted-foreground" />
-                          {result.transfer.name}
-                        </span>
-                      ),
-                    },
-                    {
-                      label: "Contents",
-                      value: `${formatBytes(result.transfer.totalSize)} · ${result.transfer.fileCount} item${result.transfer.fileCount !== 1 ? "s" : ""}`,
-                    },
-                    {
-                      label: "Created",
-                      value: formatRelativeTime(result.transfer.createdAt),
-                    },
-                    {
-                      label: "Downloads",
-                      value: `${(result.transfer as any).downloadCount ?? 0} download${(result.transfer as any).downloadCount !== 1 ? "s" : ""}`,
-                    },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <p className="text-xs text-muted-foreground/80 font-bold uppercase tracking-widest mb-1.5">{label}</p>
-                      <p className="text-base font-semibold text-foreground/90">{value}</p>
-                    </div>
-                  ))}
+                  {(() => {
+                    const isGhost = result.transfer.ghostMode;
+                    const isPassphrase = !!(result.transfer as any).hasPassphrase || !!(result.transfer as any).passphraseHash;
+                    const isE2E = result.transfer.e2eEncrypted;
+                    const downloadCount = (result.transfer as any).downloadCount ?? 0;
+
+                    // For passphrase transfers: show ONLY verified status and accurate downloads (no file details)
+                    if (isPassphrase) {
+                      return [
+                        {
+                          label: "Transfer Type",
+                          value: (
+                            <span className="flex items-center gap-2 text-emerald-400 font-semibold">
+                              <Lock className="w-4 h-4" />
+                              Passphrase Protected Transfer
+                            </span>
+                          ),
+                        },
+                        {
+                          label: "Security Status",
+                          value: "Protected · Secret passcode required to unlock files",
+                        },
+                        {
+                          label: "Created",
+                          value: formatRelativeTime(result.transfer.createdAt),
+                        },
+                        {
+                          label: "Downloads",
+                          value: `${downloadCount} download${downloadCount !== 1 ? "s" : ""}`,
+                        },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-xs text-muted-foreground/80 font-bold uppercase tracking-widest mb-1.5">{label}</p>
+                          <p className="text-base font-semibold text-foreground/90">{value}</p>
+                        </div>
+                      ));
+                    }
+
+                    // For ghost transfers: name is masked to "Ghost transfer", no file metadata trace
+                    if (isGhost) {
+                      return [
+                        {
+                          label: "Name",
+                          value: (
+                            <span className="flex items-center gap-2 text-purple-400">
+                              <Ghost className="w-4 h-4" />
+                              Ghost transfer
+                            </span>
+                          ),
+                        },
+                        {
+                          label: "Contents",
+                          value: "Zero-Trace · No logs or metadata stored",
+                        },
+                        {
+                          label: "Created",
+                          value: formatRelativeTime(result.transfer.createdAt),
+                        },
+                        {
+                          label: "Downloads",
+                          value: `${downloadCount} download${downloadCount !== 1 ? "s" : ""}`,
+                        },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <p className="text-xs text-muted-foreground/80 font-bold uppercase tracking-widest mb-1.5">{label}</p>
+                          <p className="text-base font-semibold text-foreground/90">{value}</p>
+                        </div>
+                      ));
+                    }
+
+                    // Standard or Zero-Knowledge transfers
+                    return [
+                      {
+                        label: "Name",
+                        value: (
+                          <span className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-muted-foreground" />
+                            {result.transfer.name}
+                            {isE2E && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 uppercase tracking-wider">
+                                Zero-Knowledge
+                              </span>
+                            )}
+                          </span>
+                        ),
+                      },
+                      {
+                        label: "Contents",
+                        value: isE2E
+                          ? `Zero-Knowledge Encrypted · ${result.transfer.fileCount} item${result.transfer.fileCount !== 1 ? "s" : ""} (${formatBytes(result.transfer.totalSize)})`
+                          : `${formatBytes(result.transfer.totalSize)} · ${result.transfer.fileCount} item${result.transfer.fileCount !== 1 ? "s" : ""}`,
+                      },
+                      {
+                        label: "Created",
+                        value: formatRelativeTime(result.transfer.createdAt),
+                      },
+                      {
+                        label: "Downloads",
+                        value: `${downloadCount} download${downloadCount !== 1 ? "s" : ""}`,
+                      },
+                    ].map(({ label, value }) => (
+                      <div key={label}>
+                        <p className="text-xs text-muted-foreground/80 font-bold uppercase tracking-widest mb-1.5">{label}</p>
+                        <p className="text-base font-semibold text-foreground/90">{value}</p>
+                      </div>
+                    ));
+                  })()}
                 </div>
- 
+
                 {/* Proof summary */}
                 <div className="col-span-2 md:col-span-1 space-y-5.5">
                   <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">Proof summary</p>
@@ -142,7 +215,7 @@ export default function Verify() {
                   </div>
                 </div>
               </div>
- 
+
               {/* Advanced proof drawer */}
               <div className="px-6.5 py-5 border-t border-border/20">
                 <button

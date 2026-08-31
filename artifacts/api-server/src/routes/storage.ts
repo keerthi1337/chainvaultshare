@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { RequestUploadUrlBody, RequestUploadUrlResponse } from "@workspace/api-zod";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { db, storageObjectsTable, transfersTable, transferFilesTable, transferEventsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 import { requireOwner } from "../middlewares/ownerAuth";
 import { uploadLimiter } from "../middlewares/rateLimiter";
@@ -313,9 +313,19 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
 
           activeRelays.set(objectId, {
             receiverRes: res,
-            resolve: () => {
+            resolve: async () => {
               clearTimeout(timeout);
               activeRelays.delete(objectId);
+              if (transfer.id) {
+                try {
+                  await db
+                    .update(transfersTable)
+                    .set({ downloadCount: sql`${transfersTable.downloadCount} + 1` })
+                    .where(eq(transfersTable.id, transfer.id));
+                } catch (e) {
+                  console.error("[p2p downloadCount]", e);
+                }
+              }
               resolve();
             },
             reject: (err) => {
@@ -397,6 +407,18 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
 
     // Record the download event (skipped for ghost mode)
     await recordDownloadEvent(fileRecord.transferId ?? null, fileId, receipt, req, ghostMode);
+
+    // Accurately track download count
+    if (fileRecord.transferId) {
+      try {
+        await db
+          .update(transfersTable)
+          .set({ downloadCount: sql`${transfersTable.downloadCount} + 1` })
+          .where(eq(transfersTable.id, fileRecord.transferId));
+      } catch (err) {
+        console.error("[downloadCount]", err);
+      }
+    }
 
     // Security headers
     res.setHeader("Content-Type", finalMime);

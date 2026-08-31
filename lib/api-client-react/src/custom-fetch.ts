@@ -358,23 +358,33 @@ export async function customFetch<T = unknown>(
     }
   }
 
-  // Attach x-owner-token from localStorage if available and not already provided
-  if (typeof window !== "undefined" && window.localStorage && !headers.has("x-owner-token")) {
+  // Attach x-owner-token and x-my-transfer-ids from localStorage if available
+  if (typeof window !== "undefined" && window.localStorage) {
     try {
       const raw = window.localStorage.getItem("cvs-my-transfers");
       if (raw) {
         const items = JSON.parse(raw) as Array<{ id: string; ownerToken: string }>;
         const urlStr = resolveUrl(input);
-        const match = urlStr.match(/\/transfers\/([a-f0-9-]+)/i);
-        if (match && match[1]) {
-          const targetId = match[1];
-          const found = items.find((t) => t.id === targetId);
-          if (found && found.ownerToken) {
-            headers.set("x-owner-token", found.ownerToken);
+
+        // When requesting /transfers or /transfers/recent, attach all stored IDs and tokens
+        if (/\/transfers(\/recent)?(\?.*)?$/.test(urlStr)) {
+          if (items.length > 0) {
+            if (!headers.has("x-my-transfer-ids")) {
+              headers.set("x-my-transfer-ids", items.map((t) => t.id).join(","));
+            }
+            if (!headers.has("x-owner-token")) {
+              headers.set("x-owner-token", items.map((t) => t.ownerToken).join(","));
+            }
           }
-        }
-        if (urlStr.includes("/transfers/recent") && items.length > 0 && items[0].ownerToken) {
-          headers.set("x-owner-token", items[0].ownerToken);
+        } else {
+          const match = urlStr.match(/\/transfers\/([a-f0-9-]+)/i);
+          if (match && match[1]) {
+            const targetId = match[1];
+            const found = items.find((t) => t.id === targetId);
+            if (found && found.ownerToken && !headers.has("x-owner-token")) {
+              headers.set("x-owner-token", found.ownerToken);
+            }
+          }
         }
       }
     } catch { /* ignore */ }

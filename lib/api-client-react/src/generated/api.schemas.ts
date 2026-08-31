@@ -53,6 +53,14 @@ export interface Transfer {
   totalSize: number;
   /** Whether this transfer uses peer-to-peer real-time stream relay */
   isP2p?: boolean;
+  /** Whether ghost mode is active (no logs, no analytics, no trace) */
+  ghostMode?: boolean;
+  /** Whether zero-knowledge end-to-end encryption is enabled */
+  e2eEncrypted?: boolean;
+  /** Whether the transfer is locked with a secret passphrase */
+  hasPassphrase?: boolean;
+  /** Total number of times files have been downloaded */
+  downloadCount?: number;
   /**
      * Cryptographic hash of the proof (hidden from normal UI)
      * @nullable

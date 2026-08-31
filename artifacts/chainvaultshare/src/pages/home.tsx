@@ -990,7 +990,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Ghost Mode</p>
-                        <p className="text-xs text-muted-foreground mt-1">No logs, no analytics, no trace</p>
+                        <p className="text-xs text-muted-foreground mt-1">No logs, no trace, no analytics left on server</p>
                       </div>
                     </div>
                     <button
@@ -1012,7 +1012,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Zero-Knowledge Encryption</p>
-                        <p className="text-xs text-muted-foreground mt-1">Files encrypted in your browser — server never sees plaintext</p>
+                        <p className="text-xs text-muted-foreground mt-1">Only you and your recipient can unlock this file — completely private</p>
                       </div>
                     </div>
                     <button
@@ -1037,7 +1037,7 @@ export default function Home() {
                           Direct P2P Relay
                           <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-cyan-500/20 text-cyan-400 uppercase tracking-wider">Unlimited Size</span>
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">Direct stream to recipient — bypasses server storage, keep tab open</p>
+                        <p className="text-xs text-muted-foreground mt-1">Send files of any size directly between devices — keep this tab open</p>
                       </div>
                     </div>
                     <button
@@ -1059,7 +1059,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Passphrase Lock</p>
-                        <p className="text-xs text-muted-foreground mt-1">Recipients must enter this to download</p>
+                        <p className="text-xs text-muted-foreground mt-1">Set a secret code that recipients must enter to download</p>
                       </div>
                     </div>
                     <div className="relative">

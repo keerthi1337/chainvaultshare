@@ -410,6 +410,18 @@ components:
         isP2p:
           type: boolean
           description: Whether this transfer uses peer-to-peer real-time stream relay
+        ghostMode:
+          type: boolean
+          description: Whether ghost mode is active (no logs, no analytics, no trace)
+        e2eEncrypted:
+          type: boolean
+          description: Whether zero-knowledge end-to-end encryption is enabled
+        hasPassphrase:
+          type: boolean
+          description: Whether the transfer is locked with a secret passphrase
+        downloadCount:
+          type: integer
+          description: Total number of times files have been downloaded
         proofHash:
           type: ["string", "null"]
           description: Cryptographic hash of the proof (hidden from normal UI)

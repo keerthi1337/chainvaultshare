@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useListTransfers, getListTransfersQueryKey, useGetStats, useDeleteTransfer, useUpdateTransferExpiration } from "@workspace/api-client-react";
 import { format } from "date-fns";
-import { Copy, ShieldCheck, Trash2, Search, Loader2, FileText, FolderOpen, Files, Clock, X } from "lucide-react";
+import { Copy, ShieldCheck, Trash2, Search, Loader2, FileText, FolderOpen, Files, Clock, X, Download, Ghost, Lock, Radio, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatBytes } from "@/lib/utils";
 import { getMyTransferIds, getOwnerToken, removeMyTransfer } from "@/lib/my-transfers";
@@ -28,14 +28,15 @@ export default function Transfers() {
   const [customHours, setCustomHours] = useState(0);
   const [customMinutes, setCustomMinutes] = useState(0);
 
-  // Only show transfers belonging to this session (stored locally)
-  const myIds = getMyTransferIds();
-  const transfers = allTransfers?.filter((t) => myIds.includes(t.id)) ?? [];
+  // Show active unexpired transfers for this user / IP
+  const transfers = allTransfers?.filter((t) => {
+    return new Date(t.expiresAt).getTime() > Date.now();
+  }) ?? [];
 
   const myStats = {
     total: transfers.length,
     verified: transfers.filter((t) => t.status === "verified").length,
-    files: transfers.reduce((a, t) => a + t.fileCount, 0),
+    totalDownloads: transfers.reduce((a, t) => a + ((t as any).downloadCount ?? 0), 0),
     bytes: transfers.reduce((a, t) => a + t.totalSize, 0),
   };
 
@@ -63,7 +64,7 @@ export default function Transfers() {
   const statCards = [
     { label: "My transfers", value: isLoading ? null : myStats.total },
     { label: "Verified", value: isLoading ? null : myStats.verified, accent: true },
-    { label: "Files shared", value: isLoading ? null : myStats.files },
+    { label: "Total downloads", value: isLoading ? null : myStats.totalDownloads },
     { label: "Data transferred", value: isLoading ? null : formatBytes(myStats.bytes) },
   ];
 
@@ -98,7 +99,7 @@ export default function Transfers() {
           <table className="w-full text-xs min-w-[500px]">
             <thead>
               <tr className="border-b border-border/20">
-                {["Transfer", "Date", "Expires", "Status", ""].map((h) => (
+                {["Transfer", "Date", "Expires", "Downloads", "Status", ""].map((h) => (
                   <th
                     key={h}
                     className={`px-4 md:px-5 py-3 text-left text-[10px] text-muted-foreground uppercase tracking-widest font-medium ${h === "" ? "text-right" : ""}`}
@@ -120,7 +121,7 @@ export default function Transfers() {
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
                     <p className="text-[10px] tracking-widest uppercase mb-1">No transfers yet</p>
-                    <p className="text-[10px] text-muted-foreground/50">Transfers you send will appear here.</p>
+                    <p className="text-[10px] text-muted-foreground/50">Transfers you send will stay here until they expire.</p>
                   </td>
                 </tr>
               ) : (
@@ -130,24 +131,73 @@ export default function Transfers() {
                     className="border-b border-border/10 hover:bg-muted/10 transition-colors"
                     data-testid={`row-transfer-${t.id}`}
                   >
-                    {/* Transfer — code as primary identity, name hidden */}
+                    {/* Transfer info */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg border border-border/20 bg-muted/20 flex items-center justify-center text-muted-foreground shrink-0">
-                          <ItemIcon type={t.itemType} />
+                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
+                          t.ghostMode
+                            ? "border-purple-500/30 bg-purple-500/10 text-purple-400"
+                            : (t as any).hasPassphrase
+                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                            : "border-border/20 bg-muted/20 text-muted-foreground"
+                        }`}>
+                          {t.ghostMode ? (
+                            <Ghost className="w-4 h-4" />
+                          ) : (t as any).hasPassphrase ? (
+                            <Lock className="w-4 h-4" />
+                          ) : (
+                            <ItemIcon type={t.itemType} />
+                          )}
                         </div>
                         <div>
-                          <button
-                            onClick={() => copy(t.proofId)}
-                            className="font-mono text-sm font-bold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
-                            title="Copy access code"
-                            data-testid={`button-copy-code-${t.id}`}
-                          >
-                            {t.proofId}
-                            <Copy className="w-3 h-3 opacity-60" />
-                          </button>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              onClick={() => copy(t.proofId)}
+                              className="font-mono text-sm font-bold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                              title="Copy access code"
+                              data-testid={`button-copy-code-${t.id}`}
+                            >
+                              {t.proofId}
+                              <Copy className="w-3 h-3 opacity-60" />
+                            </button>
+                            {t.ghostMode && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-purple-500/20 text-purple-400 uppercase tracking-wider">
+                                <Ghost className="w-2.5 h-2.5" />
+                                Ghost
+                              </span>
+                            )}
+                            {(t as any).hasPassphrase && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">
+                                <Lock className="w-2.5 h-2.5" />
+                                Passcode Locked
+                              </span>
+                            )}
+                            {t.e2eEncrypted && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-500/20 text-indigo-400 uppercase tracking-wider">
+                                <KeyRound className="w-2.5 h-2.5" />
+                                Zero-Knowledge
+                              </span>
+                            )}
+                            {t.isP2p && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-cyan-500/20 text-cyan-400 uppercase tracking-wider">
+                                <Radio className="w-2.5 h-2.5" />
+                                P2P Relay
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-foreground font-medium mt-0.5">
+                            {t.ghostMode
+                              ? "Ghost transfer"
+                              : (t as any).hasPassphrase
+                              ? "Passphrase Protected"
+                              : t.name}
+                          </p>
                           <p className="text-[10px] text-muted-foreground mt-0.5">
-                            {t.fileCount} item{t.fileCount !== 1 ? "s" : ""} · {formatBytes(t.totalSize)}
+                            {t.ghostMode
+                              ? "Zero logs · No trace"
+                              : (t as any).hasPassphrase
+                              ? "Protected · Passcode required to download"
+                              : `${t.fileCount} item${t.fileCount !== 1 ? "s" : ""} · ${formatBytes(t.totalSize)}`}
                           </p>
                         </div>
                       </div>
@@ -175,6 +225,14 @@ export default function Transfers() {
                         <Clock className="w-3.5 h-3.5 text-primary animate-pulse-subtle" />
                         {format(new Date(t.expiresAt), "MMM d, yyyy")}
                       </button>
+                    </td>
+
+                    {/* Downloads */}
+                    <td className="px-5 py-4 whitespace-nowrap text-xs font-mono">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold">
+                        <Download className="w-3 h-3" />
+                        {(t as any).downloadCount ?? 0}
+                      </span>
                     </td>
 
                     {/* Status */}

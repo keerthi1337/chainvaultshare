@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { eq, desc, sql, inArray } from "drizzle-orm";
+import { eq, desc, sql, inArray, and, or, gt } from "drizzle-orm";
 import { db, transfersTable, transferFilesTable, storageObjectsTable } from "@workspace/db";
 import { z } from "zod/v4";
 import {
@@ -20,6 +20,7 @@ import { hashPassphrase } from "../lib/passphrase";
 import { codeAccessLimiter, uploadLimiter } from "../middlewares/rateLimiter";
 import { requireOwner } from "../middlewares/ownerAuth";
 import { sseRegistry } from "../lib/sse";
+import { getRealIp, hashIp } from "../lib/geoip";
 
 const router: IRouter = Router();
 
@@ -55,29 +56,66 @@ router.get("/transfers/:id/progress", (req: Request, res: Response): void => {
   sseRegistry.register(id, res);
 });
 
-// ---------------------------------------------------------------------------
-// GET /transfers/recent — last 5 transfers owned by caller
-// ---------------------------------------------------------------------------
-router.get("/transfers/recent", async (req: Request, res: Response): Promise<void> => {
-  const rawToken = req.headers["x-owner-token"];
+// Helper to resolve unexpired transfers for current caller (by IP, owner token, or stored transfer IDs)
+async function getCallerTransfers(req: Request, limit?: number) {
+  const clientIp = getRealIp(req as any);
+  const hashedIp = hashIp(clientIp);
 
-  if (!rawToken || typeof rawToken !== "string") {
-    res.json([]);
-    return;
+  const rawTokens = req.headers["x-owner-token"];
+  const hashedTokens: string[] = [];
+  if (rawTokens && typeof rawTokens === "string") {
+    rawTokens.split(",").forEach((t) => {
+      const trimmed = t.trim();
+      if (trimmed) hashedTokens.push(hashToken(trimmed));
+    });
   }
 
-  const hashedToken = hashToken(rawToken);
+  const myTransferIdsHeader = req.headers["x-my-transfer-ids"] as string | undefined;
+  const myIds = myTransferIdsHeader
+    ? myTransferIdsHeader.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
 
-  // Only return transfers matching this owner token
-  const transfers = await db
+  const unexpiredCondition = gt(transfersTable.expiresAt, new Date());
+
+  const ownershipConditions = [];
+  if (hashedIp) {
+    ownershipConditions.push(eq(transfersTable.ownerIp, hashedIp));
+  }
+  if (hashedTokens.length > 0) {
+    ownershipConditions.push(inArray(transfersTable.ownerToken, hashedTokens));
+  }
+  if (myIds.length > 0) {
+    ownershipConditions.push(inArray(transfersTable.id, myIds));
+  }
+
+  if (ownershipConditions.length === 0) {
+    return [];
+  }
+
+  const query = db
     .select()
     .from(transfersTable)
-    .where(eq(transfersTable.ownerToken, hashedToken))
-    .orderBy(desc(transfersTable.createdAt))
-    .limit(5);
+    .where(and(unexpiredCondition, or(...ownershipConditions)))
+    .orderBy(desc(transfersTable.createdAt));
 
-  // Strip ownerToken from response
-  res.json(transfers.map(({ ownerToken: _ot, ...t }) => t));
+  if (limit) {
+    return await query.limit(limit);
+  }
+  return await query;
+}
+
+// ---------------------------------------------------------------------------
+// GET /transfers/recent — last 5 active transfers owned by caller / IP
+// ---------------------------------------------------------------------------
+router.get("/transfers/recent", async (req: Request, res: Response): Promise<void> => {
+  const transfers = await getCallerTransfers(req, 5);
+  res.json(
+    transfers.map(({ ownerToken: _ot, ownerIp: _oi, ...t }) => ({
+      ...t,
+      name: t.ghostMode ? "Ghost transfer" : t.name,
+      hasPassphrase: !!t.passphraseHash,
+    }))
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -107,31 +145,28 @@ router.get("/transfers/by-code/:proofId", codeAccessLimiter, async (req: Request
   }
 
   // Return only non-sensitive fields to unauthenticated callers
-  const { ownerToken: _ot, proofHash: _ph, txRef: _tx, storageRef: _sr, ...publicFields } = transfer;
-  res.json(publicFields);
+  const { ownerToken: _ot, ownerIp: _oi, proofHash: _ph, txRef: _tx, storageRef: _sr, ...publicFields } = transfer;
+  if (publicFields.ghostMode) {
+    publicFields.name = "Ghost transfer";
+  }
+  res.json({
+    ...publicFields,
+    hasPassphrase: !!transfer.passphraseHash,
+  });
 });
 
 // ---------------------------------------------------------------------------
-// GET /transfers — list all transfers for this owner token only
+// GET /transfers — list all active transfers for caller (by IP / token / IDs)
 // ---------------------------------------------------------------------------
 router.get("/transfers", async (req: Request, res: Response): Promise<void> => {
-  const rawToken = req.headers["x-owner-token"];
-
-  if (!rawToken || typeof rawToken !== "string") {
-    // Return empty list — never leak all transfers to anonymous callers
-    res.json([]);
-    return;
-  }
-
-  const hashedToken = hashToken(rawToken);
-
-  const transfers = await db
-    .select()
-    .from(transfersTable)
-    .where(eq(transfersTable.ownerToken, hashedToken))
-    .orderBy(desc(transfersTable.createdAt));
-
-  res.json(transfers.map(({ ownerToken: _ot, ...t }) => t));
+  const transfers = await getCallerTransfers(req);
+  res.json(
+    transfers.map(({ ownerToken: _ot, ownerIp: _oi, ...t }) => ({
+      ...t,
+      name: t.ghostMode ? "Ghost transfer" : t.name,
+      hasPassphrase: !!t.passphraseHash,
+    }))
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -152,6 +187,8 @@ router.post("/transfers", uploadLimiter, async (req: Request, res: Response): Pr
   const hashedOwnerToken = hashToken(rawOwnerToken);
   const expiresAt = customExpiresAt ? new Date(customExpiresAt) : new Date(Date.now() + SEVEN_DAYS_MS);
   const passphraseHash = passphrase ? hashPassphrase(passphrase) : null;
+  const clientIp = getRealIp(req as any);
+  const ownerIp = hashIp(clientIp);
 
   const [transfer] = await db
     .insert(transfersTable)
@@ -161,6 +198,7 @@ router.post("/transfers", uploadLimiter, async (req: Request, res: Response): Pr
       fileCount,
       totalSize,
       ownerAddress: ownerAddress ?? null,
+      ownerIp,
       proofId,
       shareLink: "pending",
       status: "preparing",
