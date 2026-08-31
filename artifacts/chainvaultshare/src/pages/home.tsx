@@ -850,8 +850,8 @@ export default function Home() {
 
       {/* Upload zone */}
       <div
-        className={`relative rounded-lg transition-all duration-200 overflow-hidden glass-widget ${
-          dragActive ? "border-primary bg-primary/10 glow-primary" : ""
+        className={`relative rounded-3xl transition-all duration-300 overflow-hidden liquid-glass shadow-2xl p-2.5 ${
+          dragActive ? "border-cyan-400/80 ring-4 ring-cyan-400/20" : "border-white/12"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -859,18 +859,22 @@ export default function Home() {
         onDrop={handleDrop}
         data-testid="upload-dropzone"
       >
-        <div className="px-8 md:px-10 py-12 text-center">
-          <div className={`w-16 h-16 rounded-xl border mx-auto mb-4 flex items-center justify-center transition-all ${dragActive ? "border-primary/50 bg-primary/10 text-primary" : "border-border/30 bg-muted/30 text-muted-foreground"}`}>
-            <UploadCloud className="w-8 h-8 animate-bounce-subtle" />
+        <div className="rounded-2xl border-2 border-dashed border-cyan-400/20 hover:border-cyan-400/40 bg-gradient-to-b from-white/[0.02] to-transparent px-8 md:px-12 py-14 text-center transition-all">
+          <div className={`w-20 h-20 rounded-3xl border mx-auto mb-5 flex items-center justify-center transition-all shadow-xl ${
+            dragActive 
+              ? "border-cyan-400 bg-cyan-400/20 text-cyan-300 shadow-[0_0_30px_rgba(0,240,255,0.4)] scale-110" 
+              : "border-white/15 bg-white/5 text-primary shadow-[0_0_20px_rgba(0,240,255,0.15)]"
+          }`}>
+            <UploadCloud className="w-9 h-9 animate-bounce-subtle" />
           </div>
-          <p className="text-lg font-bold mb-2 tracking-tight">{dragActive ? "Release to add files" : "Drag files here"}</p>
-          <p className="text-xs text-muted-foreground tracking-wide mb-6">or choose from your device</p>
+          <p className="text-xl font-extrabold mb-2 tracking-tight text-foreground">{dragActive ? "Drop files now" : "Drag & drop files or folders"}</p>
+          <p className="text-xs text-muted-foreground tracking-wide mb-8">All files are processed client-side with Zero-Knowledge encryption</p>
 
-          <div className="flex items-center justify-center gap-3 flex-wrap">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               onClick={() => fileInputRef.current?.click()}
               data-testid="button-upload-files"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase hover:opacity-90 transition-opacity shadow-md"
+              className="liquid-button flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-xs font-black tracking-widest uppercase text-primary-foreground shadow-lg font-mono"
             >
               <FileText className="w-4 h-4" />
               Upload Files
@@ -878,9 +882,9 @@ export default function Home() {
             <button
               onClick={() => folderInputRef.current?.click()}
               data-testid="button-upload-folder"
-              className="flex items-center gap-2 px-6 py-3 rounded-lg border border-border/40 bg-muted/20 text-xs font-bold tracking-widest uppercase hover:bg-muted/40 transition-colors shadow-md"
+              className="flex items-center gap-2.5 px-7 py-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-foreground text-xs font-black tracking-widest uppercase transition-all shadow-md font-mono"
             >
-              <FolderOpen className="w-4 h-4" />
+              <FolderOpen className="w-4 h-4 text-primary/80" />
               Upload Folder
             </button>
           </div>
@@ -975,28 +979,28 @@ export default function Home() {
               </div>
             ) : (
               <>
-              {/* ── Security Options Panel ─────────────────────────────── */}
-              <div className="mt-6 rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-border/20 flex items-center gap-2.5">
-                  <ShieldCheck className="w-4.5 h-4.5 text-primary" />
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Security Options</span>
+              {/* ── Security Options Panel ── */}
+              <div className="mt-8 rounded-3xl border border-white/12 liquid-glass overflow-hidden shadow-2xl">
+                <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-white/[0.02]">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  <span className="text-xs text-foreground uppercase tracking-widest font-black">Security Options</span>
                 </div>
-                <div className="p-5.5 space-y-5.5">
+                <div className="p-6 space-y-4">
                   {/* Ghost Mode */}
-                  <label className="flex items-center justify-between cursor-pointer group">
+                  <label className="p-4 rounded-2xl liquid-glass-card border border-purple-500/20 flex items-center justify-between cursor-pointer group">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                        <Ghost className="w-4.5 h-4.5 text-purple-400" />
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                        <Ghost className="w-5 h-5 text-purple-400" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Ghost Mode</p>
-                        <p className="text-xs text-muted-foreground mt-1">No logs, no trace, no analytics left on server</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">No logs, no trace, no analytics left on server</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setGhostMode(!ghostMode)}
-                      className={`relative rounded-full transition-all duration-300 ${ghostMode ? "bg-purple-500" : "bg-border/50"}`}
+                      className={`relative rounded-full transition-all duration-300 ${ghostMode ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" : "bg-border/50"}`}
                       style={{ width: "46px", height: "26px" }}
                     >
                       <div className="absolute top-0.5 rounded-full bg-white shadow transition-all duration-300"
@@ -1005,21 +1009,21 @@ export default function Home() {
                   </label>
 
                   {/* E2E Encryption */}
-                  <label className="flex items-center justify-between cursor-pointer">
+                  <label className="p-4 rounded-2xl liquid-glass-card border border-indigo-500/20 flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                        <KeyRound className="w-4.5 h-4.5 text-indigo-400" />
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                        <KeyRound className="w-5 h-5 text-indigo-400" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Zero-Knowledge Encryption</p>
-                        <p className="text-xs text-muted-foreground mt-1">Only you and your recipient can unlock this file — completely private</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Only you and your recipient can unlock this file — completely private</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setE2eEncrypted(!e2eEncrypted)}
                       className="relative rounded-full transition-all duration-300"
-                      style={{ width: "46px", height: "26px", background: e2eEncrypted ? "#6366f1" : "var(--border)" }}
+                      style={{ width: "46px", height: "26px", background: e2eEncrypted ? "#6366f1" : "var(--border)", boxShadow: e2eEncrypted ? "0 0 15px rgba(99,102,241,0.5)" : "none" }}
                     >
                       <div className="absolute top-0.5 rounded-full bg-white shadow transition-all duration-300"
                         style={{ width: "22px", height: "22px", transform: e2eEncrypted ? "translateX(22px)" : "translateX(2px)" }} />
@@ -1027,24 +1031,24 @@ export default function Home() {
                   </label>
 
                   {/* Direct P2P Relay */}
-                  <label className="flex items-center justify-between cursor-pointer">
+                  <label className="p-4 rounded-2xl liquid-glass-card border border-cyan-500/20 flex items-center justify-between cursor-pointer">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                        <Radio className="w-4.5 h-4.5 text-cyan-400 animate-pulse" />
+                      <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                        <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
                           Direct P2P Relay
-                          <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-cyan-500/20 text-cyan-400 uppercase tracking-wider">Unlimited Size</span>
+                          <span className="px-2 py-0.5 rounded-full text-[8px] font-black bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 uppercase tracking-wider">Unlimited Size</span>
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">Send files of any size directly between devices — keep this tab open</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Send files of any size directly between devices — keep this tab open</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsP2p(!isP2p)}
                       className="relative rounded-full transition-all duration-300"
-                      style={{ width: "46px", height: "26px", background: isP2p ? "#06b6d4" : "var(--border)" }}
+                      style={{ width: "46px", height: "26px", background: isP2p ? "#06b6d4" : "var(--border)", boxShadow: isP2p ? "0 0 15px rgba(6,182,212,0.5)" : "none" }}
                     >
                       <div className="absolute top-0.5 rounded-full bg-white shadow transition-all duration-300"
                         style={{ width: "22px", height: "22px", transform: isP2p ? "translateX(22px)" : "translateX(2px)" }} />
@@ -1052,14 +1056,14 @@ export default function Home() {
                   </label>
 
                   {/* Passphrase */}
-                  <div>
+                  <div className="p-4 rounded-2xl liquid-glass-card border border-emerald-500/20">
                     <div className="flex items-center gap-3.5 mb-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                        <Lock className="w-4.5 h-4.5 text-emerald-400" />
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                        <Lock className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground">Passphrase Lock</p>
-                        <p className="text-xs text-muted-foreground mt-1">Set a secret code that recipients must enter to download</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Set a secret code that recipients must enter to download</p>
                       </div>
                     </div>
                     <div className="relative">
@@ -1068,12 +1072,7 @@ export default function Home() {
                         value={passphrase}
                         onChange={(e) => setPassphrase(e.target.value)}
                         placeholder="Leave empty for no passphrase…"
-                        className="w-full pl-4 pr-12 py-3 rounded-xl text-sm outline-none"
-                        style={{
-                          background: "var(--bg-secondary, rgba(0,0,0,0.2))",
-                          border: "1px solid var(--border, rgba(255,255,255,0.1))",
-                          color: "var(--text-primary, white)",
-                        }}
+                        className="liquid-input w-full pl-4 pr-12 py-3 rounded-xl text-sm outline-none text-foreground"
                       />
                       <button
                         type="button"
@@ -1087,13 +1086,13 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-5 border-t border-border/20 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <div className="mt-8 pt-5 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                 <button
                   onClick={() => setShowExpiryModal(true)}
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-lg border-2 border-primary/25 bg-muted/25 hover:border-primary/50 hover:bg-muted/40 text-sm font-bold font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300 self-start sm:self-auto shadow-md"
+                  className="flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-bold font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all duration-300 self-start sm:self-auto shadow-md"
                 >
                   <Clock className="w-4 h-4 text-primary" />
-                  Set Expiration ({[
+                  Expiration ({[
                     expirationDays > 0 ? `${expirationDays}d` : "",
                     expirationHours > 0 ? `${expirationHours}h` : "",
                     expirationMinutes > 0 ? `${expirationMinutes}m` : "",
@@ -1102,7 +1101,7 @@ export default function Home() {
                 <button
                   onClick={handleTransfer}
                   data-testid="button-transfer"
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold tracking-widest uppercase hover:opacity-90 transition-opacity self-end sm:self-auto shadow-md"
+                  className="liquid-button flex items-center gap-2.5 px-8 py-4 rounded-2xl text-sm font-black tracking-widest uppercase text-primary-foreground self-end sm:self-auto shadow-xl"
                 >
                   <ShieldCheck className="w-4.5 h-4.5" />
                   {ghostMode ? "Ghost Transfer" : isP2p ? "Start P2P Relay" : e2eEncrypted ? "Encrypt & Transfer" : "Transfer securely"}

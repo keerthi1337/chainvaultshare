@@ -217,23 +217,23 @@ export default function Receive() {
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-12 mt-8">
-        <div className="w-16 h-16 rounded-2xl border border-primary/30 bg-primary/5 flex items-center justify-center mx-auto mb-6 shadow-sm shadow-primary/10">
-          <Download className="w-7 h-7 text-primary animate-pulse" />
+      <div className="text-center mb-10 mt-6">
+        <div className="w-18 h-18 rounded-3xl liquid-glass border border-cyan-400/30 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(0,240,255,0.25)] hover:scale-105 transition-all">
+          <Download className="w-8 h-8 text-primary animate-pulse" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-glow">Receive a transfer</h1>
+        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3 text-glow">Receive a transfer</h1>
         <p className="text-sm md:text-base text-muted-foreground leading-relaxed tracking-wide max-w-xl mx-auto">
-          Enter access code to download files.
+          Enter an access code or share link to download files directly.
         </p>
       </div>
 
-      <div className="rounded-2xl mb-10 overflow-hidden glass-widget border border-primary/20">
-        <form onSubmit={handleLookup} className="flex items-center">
+      <div className="rounded-3xl mb-10 overflow-hidden liquid-glass shadow-2xl p-2 border border-white/15">
+        <form onSubmit={handleLookup} className="flex items-center gap-2">
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="e.g. CVT-4291"
-            className="flex-1 bg-transparent px-6 py-4.5 text-lg text-foreground placeholder:text-muted-foreground/40 outline-none font-mono tracking-widest"
+            className="flex-1 bg-transparent px-6 py-4 text-lg md:text-xl text-foreground placeholder:text-muted-foreground/40 outline-none font-mono tracking-widest uppercase font-bold"
             data-testid="input-receive-code"
             autoComplete="off"
             spellCheck={false}
@@ -242,7 +242,7 @@ export default function Receive() {
             type="submit"
             disabled={verifyTransfer.isPending}
             data-testid="button-receive-submit"
-            className="px-10 py-4.5 text-base font-bold tracking-widest uppercase text-primary-foreground bg-primary hover:opacity-90 disabled:opacity-50 transition-opacity border-l border-border/20 shrink-0 font-mono"
+            className="liquid-button px-8 md:px-10 py-4 rounded-2xl text-sm md:text-base font-black tracking-widest uppercase text-primary-foreground shrink-0 font-mono shadow-lg"
           >
             {verifyTransfer.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Access"}
           </button>

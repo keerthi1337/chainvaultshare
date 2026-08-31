@@ -93,14 +93,14 @@ export default function Transfers() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {statCards.map(({ label, value, accent }) => (
           <div
             key={label}
-            className="rounded-[24px] px-5 py-5 glass-widget border border-primary/15"
+            className="liquid-glass-card rounded-3xl px-6 py-5 border border-white/12 shadow-xl"
           >
             <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-1.5 font-semibold">{label}</p>
-            <p className={`text-3xl font-extrabold font-mono text-glow ${accent ? "text-accent" : "text-foreground"}`}>
+            <p className={`text-3xl md:text-4xl font-black font-mono text-glow ${accent ? "text-accent" : "text-foreground"}`}>
               {value === null ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : value}
             </p>
           </div>
@@ -108,18 +108,19 @@ export default function Transfers() {
       </div>
 
       {/* Table */}
-      <div className="rounded-[24px] overflow-hidden glass-widget border border-primary/15">
-        <div className="px-5 py-4 border-b border-border/20">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Your transfers</p>
+      <div className="liquid-glass rounded-3xl overflow-hidden shadow-2xl border border-white/12">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+          <p className="text-xs text-foreground uppercase tracking-widest font-black">Your Transfers</p>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Active & Encrypted</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs min-w-[500px]">
             <thead>
-              <tr className="border-b border-border/20">
+              <tr className="border-b border-white/10 bg-white/[0.01]">
                 {["Transfer", "Date", "Expires", "Downloads", "Status", ""].map((h) => (
                   <th
                     key={h}
-                    className={`px-4 md:px-5 py-3 text-left text-[10px] text-muted-foreground uppercase tracking-widest font-medium ${h === "" ? "text-right" : ""}`}
+                    className={`px-5 py-3.5 text-left text-[10px] text-muted-foreground uppercase tracking-widest font-bold ${h === "" ? "text-right" : ""}`}
                   >
                     {h}
                   </th>
@@ -130,16 +131,16 @@ export default function Transfers() {
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2 text-primary" />
-                    <span className="text-[10px] tracking-widest uppercase">Loading...</span>
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
+                    <span className="text-[10px] tracking-widest uppercase">Loading transfers...</span>
                   </td>
                 </tr>
               ) : isError ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
                     <p className="text-[11px] font-bold text-amber-400 mb-1">Backend Server Disconnected</p>
-                    <p className="text-[10px] text-muted-foreground/60 max-w-md mx-auto leading-relaxed">
-                      Netlify is hosting the frontend interface. Your backend API server is not reachable yet. Once your backend server is deployed and connected, active transfers will appear here.
+                    <p className="text-[10px] text-muted-foreground/70 max-w-md mx-auto leading-relaxed">
+                      Unable to reach the backend API server. If deploying, please check server logs. Active transfers will appear here once connected.
                     </p>
                   </td>
                 </tr>

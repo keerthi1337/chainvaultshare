@@ -39,22 +39,22 @@ export default function Verify() {
         </p>
       </div>
 
-      {/* Lookup bar */}
-      <form onSubmit={handleVerify} className="mb-8">
-        <div className="flex gap-2">
+      {/* Search form */}
+      <form onSubmit={handleVerify} className="mb-10">
+        <div className="flex items-center gap-2 p-2 rounded-3xl liquid-glass border border-white/15 shadow-2xl">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter Proof ID (e.g. CVT-A1B2C3D4)..."
+            placeholder="Enter Proof ID or Access Code (e.g. CVT-4291)…"
             data-testid="input-verify-query"
-            className="flex-1 px-4 py-3 rounded-lg border border-border/30 bg-muted/10 font-mono text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground/50 transition-colors"
+            className="flex-1 bg-transparent px-5 py-3.5 font-mono text-sm md:text-base outline-none text-foreground placeholder:text-muted-foreground/40 font-bold uppercase tracking-wider"
           />
           <button
             type="submit"
             disabled={verifyTransfer.isPending || !query.trim()}
             data-testid="button-verify-submit"
-            className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="liquid-button px-7 py-3.5 rounded-2xl text-xs md:text-sm font-black tracking-widest uppercase text-primary-foreground flex items-center gap-2 font-mono shadow-md shrink-0"
           >
             {verifyTransfer.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Verify
@@ -66,7 +66,7 @@ export default function Verify() {
       {result && (
         <div className="space-y-4">
           {result.verified && result.transfer ? (
-            <div className="rounded overflow-hidden glass-widget">
+            <div className="rounded-3xl overflow-hidden liquid-glass shadow-2xl border border-white/12">
               {/* Verified banner */}
               <div className="flex items-center gap-4.5 px-6.5 py-5.5 bg-accent/5 border-b border-accent/15">
                 <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center shrink-0">
