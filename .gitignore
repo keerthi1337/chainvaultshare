@@ -44,6 +44,12 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
-# Replit
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local agents and config
+.agents/
 .cache/
 .local/
