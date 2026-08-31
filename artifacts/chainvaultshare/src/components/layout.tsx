@@ -76,12 +76,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <circle cx="125" cy="130" r="6" fill="currentColor"/>
               </svg>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs md:text-sm font-black tracking-wider text-foreground uppercase font-mono">
+            <div className="flex items-center">
+              <span className="text-sm md:text-base font-black tracking-wider text-foreground uppercase font-mono">
                 ChainVault<span className="text-primary font-normal">Share</span>
-              </span>
-              <span className="text-[8px] text-primary/70 tracking-widest font-mono uppercase -mt-0.5 hidden sm:inline">
-                Zero-Knowledge · P2P
               </span>
             </div>
           </Link>
@@ -170,16 +167,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main */}
-      <main className="flex-1 relative z-10 w-full px-4 md:px-8 py-4 [perspective:1200px] flex flex-col justify-center">
+      <main className="flex-1 relative z-10 w-full px-4 md:px-8 py-4 flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={location}
-            initial={{ opacity: 0, scale: 0.9, rotateX: 12, y: 30 }}
-            animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
-            exit={{ opacity: 0, scale: 1.1, rotateX: -12, y: -30 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            style={{ transformOrigin: "50% 50% -100px", backfaceVisibility: "hidden" }}
-            className="w-full"
+            initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full flex flex-col items-center"
           >
             {children}
           </motion.div>
