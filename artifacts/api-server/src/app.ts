@@ -87,6 +87,25 @@ app.use(globalLimiter);
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
+import path from "node:path";
+import fs from "node:fs";
+
 app.use("/api", router);
+
+// Serve frontend static build in production (unified single-site deployment)
+const candidateStaticPaths = [
+  path.resolve(process.cwd(), "artifacts/chainvaultshare/dist/public"),
+  path.resolve(__dirname, "../../chainvaultshare/dist/public"),
+  path.resolve(__dirname, "../chainvaultshare/dist/public"),
+  path.resolve(__dirname, "public"),
+];
+const staticDir = candidateStaticPaths.find((p) => fs.existsSync(p));
+if (staticDir) {
+  app.use(express.static(staticDir));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api/")) return next();
+    res.sendFile(path.join(staticDir, "index.html"));
+  });
+}
 
 export default app;
