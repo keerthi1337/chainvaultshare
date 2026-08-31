@@ -21,15 +21,33 @@ class SseRegistry {
 
     // Set SSE headers
     res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no"); // disable nginx buffering
+    res.setHeader("X-Accel-Buffering", "no"); // disable nginx/proxy buffering
     res.flushHeaders();
 
     this.clients.set(transferId, res);
 
+    // Send initial comment to establish SSE stream
+    res.write(`: connected\n\n`);
+
+    // Keepalive heartbeat every 15s to keep Render and reverse proxies from closing the connection
+    const keepAliveTimer = setInterval(() => {
+      if (res.writableEnded || !this.clients.has(transferId)) {
+        clearInterval(keepAliveTimer);
+        return;
+      }
+      try {
+        res.write(`: ping\n\n`);
+      } catch {
+        clearInterval(keepAliveTimer);
+        this.clients.delete(transferId);
+      }
+    }, 15000);
+
     // Auto-remove when client disconnects
     res.on("close", () => {
+      clearInterval(keepAliveTimer);
       this.clients.delete(transferId);
     });
   }

@@ -311,9 +311,13 @@ router.patch("/transfers/:id/proof", requireOwner, async (req: Request, res: Res
     return;
   }
 
-  // Emit final done event
+  // Emit final done event (keep connection alive for P2P relay)
   if (parsed.data.status === "verified") {
-    sseRegistry.emitDone(params.data.id, "done");
+    if (!updated.isP2p) {
+      sseRegistry.emitDone(params.data.id, "done");
+    } else {
+      sseRegistry.emitProgress(params.data.id, 100, "P2P Stream Relay active");
+    }
   }
 
   const { ownerToken: _ot, ...safeTransfer } = updated;

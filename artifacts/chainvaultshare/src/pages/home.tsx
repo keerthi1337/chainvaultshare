@@ -141,10 +141,12 @@ export default function Home() {
 
     es.addEventListener("p2p_request", async (event) => {
       try {
-        const { objectId } = JSON.parse((event as MessageEvent).data) as { objectId: string; objectPath: string };
-        const queued = p2pFilesRef.current[objectId];
+        const payload = JSON.parse((event as MessageEvent).data) as { objectId: string; objectPath: string };
+        const objectId = payload.objectId;
+        const objectPath = payload.objectPath;
+        const queued = p2pFilesRef.current[objectId] || (objectPath ? p2pFilesRef.current[objectPath] : undefined);
         if (!queued) {
-          console.warn("P2P queued file not found for objectId:", objectId);
+          console.warn("P2P queued file not found for objectId:", objectId, objectPath);
           return;
         }
 
@@ -193,8 +195,7 @@ export default function Home() {
     });
 
     es.onerror = () => {
-      es.close();
-      sseRef.current = null;
+      console.log("P2P SSE connection heartbeat");
     };
 
     return () => {
@@ -326,6 +327,7 @@ export default function Home() {
         if (isP2p) {
           // Register in-memory for live P2P chunk relay
           p2pFilesRef.current[objectId] = { file: qf.file, key: encKey ?? undefined };
+          p2pFilesRef.current[objectPath] = { file: qf.file, key: encKey ?? undefined };
         } else {
           let fileToUpload: File | Blob = qf.file;
           if (e2eEncrypted && encKey) {
