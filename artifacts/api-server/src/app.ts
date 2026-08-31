@@ -18,43 +18,30 @@ const allowedOrigins = [
   "http://localhost:4173",
 ];
 
-// Security headers (helmet)
+// Security headers (helmet) — disable CSP to allow fonts, streaming and Vite assets
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'", "*"],
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
-      },
-    },
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   })
 );
 
-// CORS — restrict to known origins and localhost development
+// CORS — allow same-origin and flexible access
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (server-to-server, curl)
-      if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.includes(origin) ||
-        /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?$/.test(origin)
-      ) {
-        return callback(null, true);
-      }
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
-    },
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
-    allowedHeaders: ["Content-Type", "X-Owner-Token", "X-Passphrase-Token", "X-Access-Code", "X-Download-Token", "Authorization", "Accept"],
+    allowedHeaders: [
+      "Content-Type",
+      "X-Owner-Token",
+      "X-Passphrase-Token",
+      "X-Access-Code",
+      "X-Download-Token",
+      "X-My-Transfer-Ids",
+      "Authorization",
+      "Accept",
+    ],
     exposedHeaders: ["X-Delivery-Receipt", "X-Delivery-Timestamp", "X-E2E-Encrypted", "Content-Disposition"],
   })
 );
@@ -100,10 +87,20 @@ const candidateStaticPaths = [
   path.resolve(__dirname, "public"),
 ];
 const staticDir = candidateStaticPaths.find((p) => fs.existsSync(p));
+logger.info({ staticDir, cwd: process.cwd() }, "Frontend static assets directory");
+
 if (staticDir) {
-  app.use(express.static(staticDir));
+  // Serve static assets (JS, CSS, images, SVGs) with index: false
+  app.use(express.static(staticDir, { index: false, maxAge: "1d" }));
+
+  // Fallback for SPA routes (only if no file extension, like /upload, /transfers, /verify, /t/:id)
   app.use((req, res, next) => {
     if (req.method === "GET" && !req.path.startsWith("/api/")) {
+      const ext = path.extname(req.path);
+      // If it has an extension (like missing .js or .png), don't send index.html (which would break JS parsing)
+      if (ext) {
+        return res.status(404).end();
+      }
       return res.sendFile(path.join(staticDir, "index.html"));
     }
     next();
