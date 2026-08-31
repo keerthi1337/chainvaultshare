@@ -54,9 +54,9 @@ export default function Verify() {
             type="submit"
             disabled={verifyTransfer.isPending || !query.trim()}
             data-testid="button-verify-submit"
-            className="liquid-button px-7 py-3.5 rounded-2xl text-xs md:text-sm font-black tracking-widest uppercase text-primary-foreground flex items-center gap-2 font-mono shadow-md shrink-0"
+            className="liquid-button px-7 py-3.5 rounded-2xl text-xs md:text-sm font-black tracking-widest uppercase !text-white text-white flex items-center gap-2 font-mono shadow-md shrink-0"
           >
-            {verifyTransfer.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            {verifyTransfer.isPending && <Loader2 className="w-4 h-4 animate-spin text-white" />}
             Verify
           </button>
         </div>

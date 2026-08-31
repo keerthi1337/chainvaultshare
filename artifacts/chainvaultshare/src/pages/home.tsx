@@ -874,17 +874,17 @@ export default function Home() {
             <button
               onClick={() => fileInputRef.current?.click()}
               data-testid="button-upload-files"
-              className="liquid-button flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-xs font-black tracking-widest uppercase text-primary-foreground shadow-lg font-mono"
+              className="liquid-button flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-xs font-black tracking-widest uppercase !text-white text-white shadow-lg font-mono"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="w-4 h-4 text-white" />
               Upload Files
             </button>
             <button
               onClick={() => folderInputRef.current?.click()}
               data-testid="button-upload-folder"
-              className="flex items-center gap-2.5 px-7 py-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-foreground text-xs font-black tracking-widest uppercase transition-all shadow-md font-mono"
+              className="flex items-center gap-2.5 px-7 py-3.5 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 dark:border-white/15 dark:bg-white/5 border-primary/20 bg-primary/5 text-foreground text-xs font-black tracking-widest uppercase transition-all shadow-md font-mono"
             >
-              <FolderOpen className="w-4 h-4 text-primary/80" />
+              <FolderOpen className="w-4 h-4 text-primary" />
               Upload Folder
             </button>
           </div>
@@ -1101,9 +1101,9 @@ export default function Home() {
                 <button
                   onClick={handleTransfer}
                   data-testid="button-transfer"
-                  className="liquid-button flex items-center gap-2.5 px-8 py-4 rounded-2xl text-sm font-black tracking-widest uppercase text-primary-foreground self-end sm:self-auto shadow-xl"
+                  className="liquid-button flex items-center gap-2.5 px-8 py-4 rounded-2xl text-sm font-black tracking-widest uppercase !text-white text-white self-end sm:self-auto shadow-xl"
                 >
-                  <ShieldCheck className="w-4.5 h-4.5" />
+                  <ShieldCheck className="w-4.5 h-4.5 text-white" />
                   {ghostMode ? "Ghost Transfer" : isP2p ? "Start P2P Relay" : e2eEncrypted ? "Encrypt & Transfer" : "Transfer securely"}
                 </button>
               </div>

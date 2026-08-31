@@ -242,9 +242,9 @@ export default function Receive() {
             type="submit"
             disabled={verifyTransfer.isPending}
             data-testid="button-receive-submit"
-            className="liquid-button px-8 md:px-10 py-4 rounded-2xl text-sm md:text-base font-black tracking-widest uppercase text-primary-foreground shrink-0 font-mono shadow-lg"
+            className="liquid-button px-8 md:px-10 py-4 rounded-2xl text-sm md:text-base font-black tracking-widest uppercase !text-white text-white shrink-0 font-mono shadow-lg"
           >
-            {verifyTransfer.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Access"}
+            {verifyTransfer.isPending ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : "Access"}
           </button>
         </form>
       </div>

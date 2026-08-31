@@ -29,21 +29,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div 
           className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full animate-float-orb-1 opacity-75"
           style={{
-            background: "radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 75%)",
+            background: isDark
+              ? "radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 75%)"
+              : "radial-gradient(circle, rgba(82, 0, 10, 0.09) 0%, rgba(136, 19, 55, 0.04) 50%, transparent 75%)",
             filter: "blur(90px)",
           }}
         />
         <div 
           className="absolute top-1/4 -right-40 w-[600px] h-[600px] rounded-full animate-float-orb-2 opacity-70"
           style={{
-            background: "radial-gradient(circle, rgba(147, 51, 234, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 75%)",
+            background: isDark
+              ? "radial-gradient(circle, rgba(147, 51, 234, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 75%)"
+              : "radial-gradient(circle, rgba(190, 24, 93, 0.08) 0%, rgba(82, 0, 10, 0.03) 50%, transparent 75%)",
             filter: "blur(100px)",
           }}
         />
         <div 
           className="absolute -bottom-40 left-1/3 w-[650px] h-[650px] rounded-full animate-float-orb-3 opacity-65"
           style={{
-            background: "radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 75%)",
+            background: isDark
+              ? "radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 75%)"
+              : "radial-gradient(circle, rgba(82, 0, 10, 0.07) 0%, transparent 75%)",
             filter: "blur(110px)",
           }}
         />
@@ -56,7 +62,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="liquid-glass-dock rounded-2xl md:rounded-full px-5 h-16 flex items-center justify-between shadow-2xl">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-3 group select-none" onClick={() => setMobileOpen(false)}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-cyan-400/30 bg-gradient-to-br from-cyan-500/20 to-blue-500/10 shadow-[0_0_15px_rgba(0,240,255,0.25)] group-hover:scale-105 transition-all">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-primary/30 bg-primary/10 shadow-[0_0_15px_rgba(0,240,255,0.2)] group-hover:scale-105 transition-all">
               <svg width="20" height="20" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
                 <line x1="65" y1="90" x2="115" y2="60" stroke="currentColor" strokeWidth="7" strokeLinecap="round" opacity="0.95"/>
                 <line x1="65" y1="90" x2="115" y2="120" stroke="currentColor" strokeWidth="7" strokeLinecap="round" opacity="0.95"/>
@@ -91,7 +97,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     className={`relative flex items-center gap-2 px-4.5 py-2 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
-                      isActive ? "text-foreground font-extrabold" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      isActive ? "text-foreground font-extrabold" : "text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
                     }`}
                     data-testid={`nav-${item.label.toLowerCase()}`}
                   >
@@ -100,7 +106,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     {isActive && (
                       <motion.span
                         layoutId="activeTabBubble"
-                        className="absolute inset-0 rounded-full border border-primary/40 bg-gradient-to-b from-white/12 to-primary/10 shadow-[0_4px_20px_rgba(0,240,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.3)]"
+                        className={`absolute inset-0 rounded-full border ${
+                          isDark
+                            ? "border-primary/40 bg-gradient-to-b from-white/12 to-primary/10 shadow-[0_4px_20px_rgba(0,240,255,0.25),inset_0_1px_2px_rgba(255,255,255,0.3)]"
+                            : "border-primary/30 bg-primary/10 shadow-[0_4px_15px_rgba(82,0,10,0.15),inset_0_1px_2px_rgba(255,255,255,0.8)]"
+                        }`}
                         style={{ zIndex: 0 }}
                         transition={{ type: "spring", stiffness: 380, damping: 25 }}
                       />
