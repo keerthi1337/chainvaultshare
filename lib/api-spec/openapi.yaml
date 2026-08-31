@@ -1,0 +1,600 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: ChainVaultShare API — secure file transfer with blockchain-backed proof
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: transfers
+    description: Transfer operations
+  - name: verification
+    description: Verification operations
+  - name: stats
+    description: Statistics and summaries
+  - name: storage
+    description: Object storage operations
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /transfers:
+    get:
+      operationId: listTransfers
+      tags: [transfers]
+      summary: List recent transfers
+      description: Returns all transfers ordered by creation date
+      responses:
+        "200":
+          description: List of transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transfer"
+    post:
+      operationId: createTransfer
+      tags: [transfers]
+      summary: Create a new transfer record
+      description: Register a new transfer and generate a shareable link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferInput"
+      responses:
+        "201":
+          description: Transfer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transfers/{id}:
+    get:
+      operationId: getTransfer
+      tags: [transfers]
+      summary: Get a transfer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transfer found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTransfer
+      tags: [transfers]
+      summary: Delete a transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transfers/{id}/proof:
+    patch:
+      operationId: updateTransferProof
+      tags: [transfers]
+      summary: Update blockchain proof data for a transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProofUpdate"
+      responses:
+        "200":
+          description: Proof updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transfers/{id}/expiration:
+    patch:
+      operationId: updateTransferExpiration
+      tags: [transfers]
+      summary: Update expiration date for a transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - expiresAt
+              properties:
+                expiresAt:
+                  type: string
+                  format: date-time
+      responses:
+        "200":
+          description: Expiration updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /verify:
+    post:
+      operationId: verifyTransfer
+      tags: [verification]
+      summary: Verify a transfer by link or proof ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyInput"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get transfer statistics summary
+      description: Returns aggregate counts and recent activity for the dashboard
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferStats"
+
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL for a file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transfers/{id}/files:
+    get:
+      operationId: getTransferFiles
+      tags: [transfers]
+      summary: Get all files for a transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransferFile"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: addTransferFile
+      tags: [transfers]
+      summary: Record an uploaded file under a transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferFileInput"
+      responses:
+        "201":
+          description: File recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferFile"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /transfers/recent:
+    get:
+      operationId: getRecentTransfers
+      tags: [transfers]
+      summary: Get the 5 most recent transfers
+      responses:
+        "200":
+          description: Recent transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transfer"
+
+  /transfers/by-code/{proofId}:
+    get:
+      operationId: getTransferByCode
+      tags: [transfers]
+      summary: Look up a transfer by its CVT proof code
+      parameters:
+        - name: proofId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transfer found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "404":
+          description: Not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Transfer:
+      type: object
+      required:
+        - id
+        - name
+        - itemType
+        - status
+        - createdAt
+        - expiresAt
+        - shareLink
+        - proofId
+        - fileCount
+        - totalSize
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: Name of the file or folder being transferred
+        itemType:
+          type: string
+          enum: [file, folder, multiple]
+          description: Type of item being transferred
+        status:
+          type: string
+          enum: [preparing, uploading, securing, verified, failed, expired]
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          description: When this transfer and its files expire (7 days from creation)
+        shareLink:
+          type: string
+          description: Shareable URL for this transfer
+        proofId:
+          type: string
+          description: Human-readable proof ID like CVT-2048
+        fileCount:
+          type: integer
+          description: Number of files in the transfer
+        totalSize:
+          type: integer
+          description: Total size in bytes
+        isP2p:
+          type: boolean
+          description: Whether this transfer uses peer-to-peer real-time stream relay
+        proofHash:
+          type: ["string", "null"]
+          description: Cryptographic hash of the proof (hidden from normal UI)
+        storageRef:
+          type: ["string", "null"]
+          description: Storage reference identifier (hidden from normal UI)
+        txRef:
+          type: ["string", "null"]
+          description: Transaction reference (hidden from normal UI)
+        ownerAddress:
+          type: ["string", "null"]
+          description: Owner address (hidden from normal UI)
+        networkName:
+          type: ["string", "null"]
+          description: Blockchain network name
+        verifiedAt:
+          type: ["string", "null"]
+          format: date-time
+          description: When the transfer was verified on chain
+
+    TransferInput:
+      type: object
+      required:
+        - name
+        - itemType
+        - fileCount
+        - totalSize
+      properties:
+        name:
+          type: string
+          minLength: 1
+        itemType:
+          type: string
+          enum: [file, folder, multiple]
+        fileCount:
+          type: integer
+          minimum: 1
+        totalSize:
+          type: integer
+          minimum: 0
+        ownerAddress:
+          type: ["string", "null"]
+        isP2p:
+          type: boolean
+          description: Whether this transfer uses peer-to-peer real-time stream relay
+
+    ProofUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [preparing, uploading, securing, verified, failed, expired]
+        proofHash:
+          type: ["string", "null"]
+        storageRef:
+          type: ["string", "null"]
+        txRef:
+          type: ["string", "null"]
+        ownerAddress:
+          type: ["string", "null"]
+        networkName:
+          type: ["string", "null"]
+
+    VerifyInput:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Transfer share link or proof ID (e.g. CVT-2048)
+
+    VerificationResult:
+      type: object
+      required:
+        - verified
+        - message
+      properties:
+        verified:
+          type: boolean
+        expired:
+          type: boolean
+          description: True if the transfer existed but has expired
+        message:
+          type: string
+          description: Plain English result message
+        transfer:
+          $ref: "#/components/schemas/Transfer"
+
+    TransferStats:
+      type: object
+      required:
+        - totalTransfers
+        - verifiedTransfers
+        - totalFilesTransferred
+        - totalBytesTransferred
+        - recentActivity
+      properties:
+        totalTransfers:
+          type: integer
+        verifiedTransfers:
+          type: integer
+        totalFilesTransferred:
+          type: integer
+        totalBytesTransferred:
+          type: integer
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transfer"
+
+    TransferFile:
+      type: object
+      required:
+        - id
+        - transferId
+        - name
+        - size
+        - contentType
+        - objectPath
+        - createdAt
+      properties:
+        id:
+          type: integer
+        transferId:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+        objectPath:
+          type: string
+          description: GCS object path for downloading
+        createdAt:
+          type: string
+          format: date-time
+
+    TransferFileInput:
+      type: object
+      required:
+        - name
+        - size
+        - contentType
+        - objectPath
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+        objectPath:
+          type: string
+
+    RequestUploadUrlBody:
+      type: object
+      required:
+        - name
+        - size
+        - contentType
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+
+    RequestUploadUrlResponse:
+      type: object
+      required:
+        - uploadURL
+        - objectPath
+      properties:
+        uploadURL:
+          type: string
+          description: Presigned GCS upload URL
+        objectPath:
+          type: string
+          description: Object path to store and use for downloads
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

@@ -1,0 +1,1 @@
+- [Vite file-watcher after codegen](vite-codegen-restart.md) — after orval codegen cleans+regenerates files, Vite loses track of them; fix is typecheck:libs then restart the web workflow
