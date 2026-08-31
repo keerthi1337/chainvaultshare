@@ -102,9 +102,11 @@ const candidateStaticPaths = [
 const staticDir = candidateStaticPaths.find((p) => fs.existsSync(p));
 if (staticDir) {
   app.use(express.static(staticDir));
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api/")) return next();
-    res.sendFile(path.join(staticDir, "index.html"));
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api/")) {
+      return res.sendFile(path.join(staticDir, "index.html"));
+    }
+    next();
   });
 }
 
