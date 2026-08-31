@@ -15,8 +15,19 @@ function ItemIcon({ type }: { type: string }) {
   return <FileText className="w-3.5 h-3.5" />;
 }
 
+function safeFormatDate(val?: string | Date, pattern = "MMM d, yyyy"): string {
+  if (!val) return "—";
+  try {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return "—";
+    return format(d, pattern);
+  } catch {
+    return "—";
+  }
+}
+
 export default function Transfers() {
-  const { data: allTransfers, isLoading } = useListTransfers();
+  const { data: allTransfers, isLoading, isError } = useListTransfers();
   const { data: stats, isLoading: statsLoading } = useGetStats();
   const deleteTransfer = useDeleteTransfer();
   const updateExpiration = useUpdateTransferExpiration();
@@ -29,15 +40,21 @@ export default function Transfers() {
   const [customMinutes, setCustomMinutes] = useState(0);
 
   // Show active unexpired transfers for this user / IP
-  const transfers = allTransfers?.filter((t) => {
-    return new Date(t.expiresAt).getTime() > Date.now();
-  }) ?? [];
+  const validTransfers = Array.isArray(allTransfers) ? allTransfers : [];
+  const transfers = validTransfers.filter((t) => {
+    if (!t) return false;
+    try {
+      return t.expiresAt ? new Date(t.expiresAt).getTime() > Date.now() : true;
+    } catch {
+      return true;
+    }
+  });
 
   const myStats = {
     total: transfers.length,
-    verified: transfers.filter((t) => t.status === "verified").length,
-    totalDownloads: transfers.reduce((a, t) => a + ((t as any).downloadCount ?? 0), 0),
-    bytes: transfers.reduce((a, t) => a + t.totalSize, 0),
+    verified: transfers.filter((t) => t?.status === "verified").length,
+    totalDownloads: transfers.reduce((a, t) => a + (Number((t as any)?.downloadCount) || 0), 0),
+    bytes: transfers.reduce((a, t) => a + (Number(t?.totalSize) || 0), 0),
   };
 
   const copy = (text: string) => {
@@ -115,6 +132,15 @@ export default function Transfers() {
                   <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2 text-primary" />
                     <span className="text-[10px] tracking-widest uppercase">Loading...</span>
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">
+                    <p className="text-[11px] font-bold text-amber-400 mb-1">Backend Server Disconnected</p>
+                    <p className="text-[10px] text-muted-foreground/60 max-w-md mx-auto leading-relaxed">
+                      Netlify is hosting the frontend interface. Your backend API server is not reachable yet. Once your backend server is deployed and connected, active transfers will appear here.
+                    </p>
                   </td>
                 </tr>
               ) : transfers.length === 0 ? (
@@ -205,7 +231,7 @@ export default function Transfers() {
 
                     {/* Date */}
                     <td className="px-5 py-4 text-muted-foreground whitespace-nowrap font-mono text-xs">
-                      {format(new Date(t.createdAt), "MMM d, yyyy")}
+                      {safeFormatDate(t.createdAt)}
                     </td>
 
                     {/* Expires */}
@@ -213,7 +239,8 @@ export default function Transfers() {
                       <button
                         onClick={() => {
                           setSelectedTransfer(t);
-                          const msLeft = new Date(t.expiresAt).getTime() - Date.now();
+                          const expTime = t.expiresAt ? new Date(t.expiresAt).getTime() : Date.now() + 7 * 86400000;
+                          const msLeft = Math.max(0, expTime - Date.now());
                           const hoursLeft = Math.max(0, Math.ceil(msLeft / (60 * 60 * 1000)));
                           setCustomDays(Math.floor(hoursLeft / 24));
                           setCustomHours(hoursLeft % 24);
@@ -223,7 +250,7 @@ export default function Transfers() {
                         title="Click to modify expiration"
                       >
                         <Clock className="w-3.5 h-3.5 text-primary animate-pulse-subtle" />
-                        {format(new Date(t.expiresAt), "MMM d, yyyy")}
+                        {safeFormatDate(t.expiresAt)}
                       </button>
                     </td>
 
